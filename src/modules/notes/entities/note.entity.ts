@@ -2,13 +2,12 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 import { DatabaseBaseEntity } from 'src/common/database/base/entity/BaseEntity';
 import { ALL_GROUP } from 'src/common/database/constant/serialization-group.constant';
-import { CourseEntity } from 'src/modules/course/entities/course.entity';
-import { NotesEntity } from 'src/modules/notes/entities/note.entity';
+import { ChapterEntity } from 'src/modules/chapter/entities/chapter.entity';
 import { BigIntTransformerPipe } from 'src/utils/bigIntTransformer';
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
-@Entity({ name: 'chapter' })
-export class ChapterEntity extends DatabaseBaseEntity {
+@Entity({ name: 'note' })
+export class NotesEntity extends DatabaseBaseEntity {
   @ApiProperty()
   @Expose({ groups: ALL_GROUP })
   @Column({ type: String, length: 255, unique: true, nullable: false })
@@ -16,8 +15,12 @@ export class ChapterEntity extends DatabaseBaseEntity {
 
   @ApiProperty()
   @Expose({ groups: ALL_GROUP })
-  @Column({ type: String, nullable: false })
-  content?: string;
+  @Column({
+    type: 'bigint',
+    transformer: new BigIntTransformerPipe(),
+    nullable: false,
+  })
+  userId?: number;
 
   @ApiProperty()
   @Expose({ groups: ALL_GROUP })
@@ -26,24 +29,16 @@ export class ChapterEntity extends DatabaseBaseEntity {
     transformer: new BigIntTransformerPipe(),
     nullable: true,
   })
-  courseId?: number;
+  chapterId?: number;
 
   @ApiProperty()
   @Expose({ groups: ALL_GROUP })
   @Column({ type: String, nullable: true })
-  videoLink?: string;
+  content?: string;
 
-  @ApiProperty()
-  @Expose({ groups: ALL_GROUP })
-  @Column({ type: Number, nullable: true })
-  index?: number;
-
-  @ManyToOne(() => CourseEntity, (c) => c.id)
+  @ManyToOne(() => ChapterEntity, (user) => user.notes)
   @JoinColumn({
-    name: 'courseId',
+    name: 'chapterId',
   })
-  course?: CourseEntity;
-
-  @OneToMany(() => NotesEntity, (a) => a.chapter)
-  notes: NotesEntity[];
+  chapter?: ChapterEntity;
 }

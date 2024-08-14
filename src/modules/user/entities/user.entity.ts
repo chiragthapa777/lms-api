@@ -3,8 +3,11 @@ import * as bcrypt from 'bcryptjs';
 import { Exclude, Expose } from 'class-transformer';
 import { DatabaseBaseEntity } from 'src/common/database/base/entity/BaseEntity';
 import { ALL_GROUP } from 'src/common/database/constant/serialization-group.constant';
-import { BeforeInsert, BeforeUpdate, Column, Entity } from 'typeorm';
+import { CourseEnrollmentEntity } from 'src/modules/enrollment/entities/course-enrollements.entity';
+import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany } from 'typeorm';
 import { IUser } from '../interfaces/user.interface';
+import { PaymentEntity } from 'src/modules/payment/entities/payment.entity';
+import { NotesEntity } from 'src/modules/notes/entities/note.entity';
 
 export const USER_TABLE_NAME = 'users';
 
@@ -46,4 +49,13 @@ export class UserEntity extends DatabaseBaseEntity implements IUser {
       this.password = await bcrypt.hash(this.password, 10);
     }
   }
+
+  @OneToMany(() => CourseEnrollmentEntity, (r) => r.userId)
+  enrollments?: CourseEnrollmentEntity[];
+
+  @OneToMany(() => PaymentEntity, (r) => r.userId)
+  payments?: PaymentEntity[];
+
+  @OneToMany(() => NotesEntity, (r) => r.userId)
+  notes?: NotesEntity[];
 }
