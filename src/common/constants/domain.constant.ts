@@ -1,0 +1,5 @@
+export enum DOMAIN {
+  PROPERTY = 'PROPERTY',
+  DECORATOR = 'DECORATOR',
+  TALENT = 'TALENT',
+}
