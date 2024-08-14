@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { ENUM_APP_ENVIRONMENT } from './common/constants/app.constant';
 import { AdminRouterModule } from './router/routes/admin.router.module';
+import { StudentRouterModule } from './router/routes/student.router.module';
 
 export default async function (app: NestApplication) {
   const configService = app.get(ConfigService);
@@ -53,40 +54,36 @@ export default async function (app: NestApplication) {
       },
       customCss,
     });
-    // for customer
-    // const customerDocumentBuild = new DocumentBuilder()
-    //   .setTitle('Mero Event Customer API')
-    //   .setDescription('APIs for Mero Event Customer')
-    //   .setVersion('1')
-    //   .addBearerAuth(
-    //     { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
-    //     'accessToken',
-    //   )
-    //   // .addBearerAuth(
-    //   //   { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
-    //   //   'refreshToken',
-    //   // )
-    //   .build();
+    // for student
+    const studentDocumentBuild = new DocumentBuilder()
+      .setTitle('IMS Student API')
+      .setDescription('APIs for IMS Students')
+      .setVersion('1')
+      .addBearerAuth(
+        { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+        'accessToken',
+      )
+      .build();
 
-    // const customerDocument = SwaggerModule.createDocument(
-    //   app,
-    //   customerDocumentBuild,
-    //   {
-    //     deepScanRoutes: true,
-    //     include: [CustomerRouterModule],
-    //   },
-    // );
+    const studentDocument = SwaggerModule.createDocument(
+      app,
+      studentDocumentBuild,
+      {
+        deepScanRoutes: true,
+        include: [StudentRouterModule],
+      },
+    );
 
-    // SwaggerModule.setup('/customer-docs', app, customerDocument, {
-    //   explorer: true,
-    //   customSiteTitle: 'Mero Event Customer',
-    //   swaggerOptions: {
-    //     docExpansion: 'none',
-    //     filter: true,
-    //     showRequestDuration: true,
-    //     persistAuthorization: true,
-    //   },
-    //   customCss,
-    // });
+    SwaggerModule.setup('/student-docs', app, studentDocument, {
+      explorer: true,
+      customSiteTitle: 'Mero Event Customer',
+      swaggerOptions: {
+        docExpansion: 'none',
+        filter: true,
+        showRequestDuration: true,
+        persistAuthorization: true,
+      },
+      customCss,
+    });
   }
 }

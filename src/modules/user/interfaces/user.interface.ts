@@ -1,11 +1,8 @@
 export enum USER_TYPE {
   ADMIN = 'ADMIN',
-  CUSTOMER = 'CUSTOMER',
-  VENDOR = 'VENDOR',
+  STUDENT = 'STUDENT',
 }
-export interface IUser {
-
-}
+export interface IUser {}
 
 export interface IUserNameJson {
   firstName?: string | null;

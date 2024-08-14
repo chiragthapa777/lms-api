@@ -90,6 +90,7 @@ export class UserAdminController {
     @Query() paginateQueryDto: PaginateQueryDto,
     @Query() type?: UserTypeDto,
   ): Promise<IResponsePaging<UserEntity>> {
+    console.log('🚀 ~ UserAdminController ~ type:', type);
     const where: FindOptionsWhere<UserEntity> = {};
     const data = await this.userService.paginatedGet({
       ...paginateQueryDto,
