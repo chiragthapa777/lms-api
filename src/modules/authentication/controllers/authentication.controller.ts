@@ -31,7 +31,7 @@ import { UserService } from 'src/modules/user/user.service';
 })
 @ApiTags('Authentication')
 @Controller('auth')
-export class AuthenticationAdminController {
+export class AuthenticationController {
   constructor(
     private readonly authenticationService: AuthenticationService,
     private readonly userService: UserService,
@@ -114,7 +114,7 @@ export class AuthenticationAdminController {
 
       const newUser = await this.userService.create({
         ...body,
-        role: USER_ROLE.ADMIN,
+        role: USER_ROLE.USER,
       });
 
       const data: AuthToken =
