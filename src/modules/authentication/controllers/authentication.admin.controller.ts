@@ -83,6 +83,7 @@ export class AuthenticationAdminController {
       await queryRunner.release();
     }
   }
+  
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   @ApiDocs({
     operation: 'Register',

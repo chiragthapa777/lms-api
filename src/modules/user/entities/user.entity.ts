@@ -7,6 +7,11 @@ import { BeforeInsert, BeforeUpdate, Column, Entity } from 'typeorm';
 import { IUser } from '../interfaces/user.interface';
 
 export const USER_TABLE_NAME = 'users';
+
+export enum USER_ROLE {
+  USER = 'USER',
+  ADMIN = 'ADMIN',
+}
 @Entity({ name: USER_TABLE_NAME })
 export class UserEntity extends DatabaseBaseEntity implements IUser {
   @ApiProperty()
@@ -23,6 +28,11 @@ export class UserEntity extends DatabaseBaseEntity implements IUser {
   @Expose({ groups: ALL_GROUP })
   @Column({ type: String, nullable: true })
   avatar: string;
+
+  @ApiProperty()
+  @Expose({ groups: ALL_GROUP })
+  @Column({ type: String, nullable: true })
+  role: USER_ROLE;
 
   @ApiProperty()
   @Exclude()
