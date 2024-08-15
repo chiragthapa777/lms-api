@@ -9,4 +9,4 @@ import { ChapterRepository } from './chapter.repository';
   controllers: [],
   imports: [TypeOrmModule.forFeature([ChapterEntity])],
 })
-export class UserRepositoryModule {}
+export class ChapterRepositoryModule {}

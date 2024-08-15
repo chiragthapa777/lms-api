@@ -10,7 +10,6 @@ import { HelperModule } from './helper/helper.module';
 import { MailerModule } from './mailer/mailer.module';
 import { RequestModule } from './request/request.module';
 import { ResponseModule } from './response/response.module';
-import { SentryModule } from './sentry/sentry.module';
 import { SmsModule } from './sms/sms.module';
 
 @Module({
@@ -35,7 +34,6 @@ import { SmsModule } from './sms/sms.module';
     SmsModule,
     AuthModule,
     HelperModule,
-    SentryModule,
     DebuggerModule,
   ],
   exports: [],
