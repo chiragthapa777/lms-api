@@ -21,7 +21,7 @@ export class UserService {
   constructor(private readonly userRepo: UserRepository) {}
 
   async create(
-    createDto: DeepPartial<UserEntity & { profilePictureId: number }>,
+    createDto: DeepPartial<UserEntity>,
     options?: ICreateOptions,
   ): Promise<UserEntity> {
     const data = await this.userRepo._create(createDto, {

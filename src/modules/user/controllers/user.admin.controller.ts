@@ -28,7 +28,7 @@ import {
 } from 'src/common/response/interfaces/response.interface';
 import { DataSource, FindOptionsWhere, QueryRunner } from 'typeorm';
 import { UpdateUserDto, UpdateUserProfileDto } from '../dto/update-user.dto';
-import { UserEntity } from '../entities/user.entity';
+import { USER_ROLE, UserEntity } from '../entities/user.entity';
 import {
   UserPaginationSerialization,
   UserSerialization,
@@ -66,6 +66,7 @@ export class UserAdminController {
       if (user) {
         throw new BadRequestException('Email exists');
       }
+      createUserDto.role = USER_ROLE.ADMIN;
       const data: UserEntity = await this.userService.create(createUserDto, {
         entityManager: queryRunner.manager,
       });
@@ -91,6 +92,9 @@ export class UserAdminController {
     @Query() type?: UserTypeDto,
   ): Promise<IResponsePaging<UserEntity>> {
     const where: FindOptionsWhere<UserEntity> = {};
+    if (type?.role) {
+      where.role = type.role;
+    }
     const data = await this.userService.paginatedGet({
       ...paginateQueryDto,
       searchableColumns: ['email', 'name'],

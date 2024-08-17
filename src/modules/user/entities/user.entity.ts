@@ -30,7 +30,7 @@ export class UserEntity extends DatabaseBaseEntity implements IUser {
   @ApiProperty()
   @Expose({ groups: ALL_GROUP })
   @Column({ type: String, nullable: true })
-  avatar: string;
+  avatar?: string;
 
   @ApiProperty()
   @Expose({ groups: ALL_GROUP })

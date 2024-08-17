@@ -27,7 +27,7 @@ import { CourseCreateDto, CourseUpdateDto } from '../course.dto';
 
 @ApiTags('Course')
 @Controller({
-  path: 'Course',
+  path: 'course',
 })
 export class CourseAdminController {
   constructor(
@@ -97,7 +97,12 @@ export class CourseAdminController {
   @Get('/info/:id')
   async getById(@Param('id') id: number): Promise<IResponse<CourseEntity>> {
     const data = await this.service.getById(id, {
-      options: {},
+      options: {
+        relations: {
+          enrollments: true,
+          chapters: true,
+        },
+      },
     });
     if (!data) throw new NotFoundException('Cannot find Course');
     return { data };

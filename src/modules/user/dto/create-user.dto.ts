@@ -4,17 +4,16 @@ import {
   CustomIsString,
   CustomMatches,
   CustomMaxLength,
-  CustomMinLength
+  CustomMinLength,
 } from 'src/common/request/validators/custom-validator';
-import {
-  IUser
-} from '../interfaces/user.interface';
-
+import { IUser } from '../interfaces/user.interface';
+import { USER_ROLE } from '../entities/user.entity';
+import { IsOptional } from 'class-validator';
 
 export class CreateUserDto implements IUser {
   @ApiProperty({
-    required: false,
     example: 'Test@123',
+    required: false,
   })
   @CustomIsString()
   @CustomMinLength(8)
@@ -59,6 +58,8 @@ export class CreateUserDto implements IUser {
   @CustomIsString()
   @CustomMinLength(10)
   @CustomMaxLength(1000)
+  @IsOptional()
   avatar?: string | undefined;
- 
+
+  role?: USER_ROLE;
 }
