@@ -15,29 +15,26 @@ import {
   IResponsePaging,
 } from 'src/common/response/interfaces/response.interface';
 import { DataSource, FindOptionsWhere } from 'typeorm';
-import { ChapterService } from '../chapter.service';
-import { ChapterEntity } from '../entities/chapter.entity';
+import { CourseService } from '../course.service';
+import { CourseEntity } from '../entities/course.entity';
 import { ApiTags } from '@nestjs/swagger';
 
-@ApiTags('Chapter')
+@ApiTags('Course')
 @Controller({
-  path: 'chapter',
+  path: 'course',
 })
-export class ChapterController {
-  constructor(
-    private readonly service: ChapterService,
-    private connection: DataSource,
-  ) {}
+export class CourseController {
+  constructor(private readonly service: CourseService) {}
 
   @ApiDocs({
-    operation: 'List chapter',
+    operation: 'List course',
   })
   @ResponseMessage('Users listed successfully.')
   @Get('/list')
   async list(
     @Query() paginateQueryDto: PaginateQueryDto,
-  ): Promise<IResponsePaging<ChapterEntity>> {
-    const where: FindOptionsWhere<ChapterEntity> = {};
+  ): Promise<IResponsePaging<CourseEntity>> {
+    const where: FindOptionsWhere<CourseEntity> = {};
     const data = await this.service.paginatedGet({
       ...paginateQueryDto,
       searchableColumns: ['content', 'title'],
@@ -64,11 +61,11 @@ export class ChapterController {
   @RequestParamGuard(IdParamDto)
   @ResponseMessage('Chapter retrieved successfully.')
   @Get('/info/:id')
-  async getById(@Param('id') id: number): Promise<IResponse<ChapterEntity>> {
+  async getById(@Param('id') id: number): Promise<IResponse<CourseEntity>> {
     const data = await this.service.getById(id, {
       options: {},
     });
-    if (!data) throw new NotFoundException('Cannot find chapter');
+    if (!data) throw new NotFoundException('Cannot find course');
     return { data };
   }
 }

@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class ChapterCreateDto {
@@ -22,3 +22,5 @@ export class ChapterCreateDto {
   @IsNumber()
   index?: number;
 }
+
+export class ChapterUpdateDto extends PartialType(ChapterCreateDto) {}

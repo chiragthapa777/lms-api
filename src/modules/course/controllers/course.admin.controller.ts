@@ -21,29 +21,27 @@ import {
 } from 'src/common/response/interfaces/response.interface';
 import { USER_ROLE } from 'src/modules/user/entities/user.entity';
 import { DataSource, FindOptionsWhere, QueryRunner } from 'typeorm';
-import { ChapterService } from '../chapter.service';
-import { ChapterEntity } from '../entities/chapter.entity';
-import { ChapterCreateDto, ChapterUpdateDto } from '../chapter.dto';
+import { CourseService } from '../course.service';
+import { CourseEntity } from '../entities/course.entity';
+import { CourseCreateDto, CourseUpdateDto } from '../course.dto';
 
-@ApiTags('Chapter')
+@ApiTags('Course')
 @Controller({
-  path: 'chapter',
+  path: 'Course',
 })
-export class ChapterAdminController {
+export class CourseAdminController {
   constructor(
-    private readonly service: ChapterService,
+    private readonly service: CourseService,
     private connection: DataSource,
   ) {}
 
   @ApiDocs({
-    operation: 'create chapter',
+    operation: 'create Course',
   })
   @UserProtected({ role: USER_ROLE.ADMIN })
-  @ResponseMessage('Chapter created successfully.')
+  @ResponseMessage('Course created successfully.')
   @Post('/create')
-  async create(
-    @Body() dto: ChapterCreateDto,
-  ): Promise<IResponse<ChapterEntity>> {
+  async create(@Body() dto: CourseCreateDto): Promise<IResponse<CourseEntity>> {
     const queryRunner = this.connection.createQueryRunner();
     await queryRunner.startTransaction();
     try {
@@ -62,14 +60,14 @@ export class ChapterAdminController {
 
   @UserProtected({ role: USER_ROLE.ADMIN })
   @ApiDocs({
-    operation: 'List chapter',
+    operation: 'List Course',
   })
-  @ResponseMessage('Chapter listed successfully.')
+  @ResponseMessage('Course listed successfully.')
   @Get('/list')
   async list(
     @Query() paginateQueryDto: PaginateQueryDto,
-  ): Promise<IResponsePaging<ChapterEntity>> {
-    const where: FindOptionsWhere<ChapterEntity> = {};
+  ): Promise<IResponsePaging<CourseEntity>> {
+    const where: FindOptionsWhere<CourseEntity> = {};
     const data = await this.service.paginatedGet({
       ...paginateQueryDto,
       searchableColumns: ['content', 'title'],
@@ -95,13 +93,13 @@ export class ChapterAdminController {
     ],
   })
   @RequestParamGuard(IdParamDto)
-  @ResponseMessage('Chapter retrieved successfully.')
+  @ResponseMessage('Course retrieved successfully.')
   @Get('/info/:id')
-  async getById(@Param('id') id: number): Promise<IResponse<ChapterEntity>> {
+  async getById(@Param('id') id: number): Promise<IResponse<CourseEntity>> {
     const data = await this.service.getById(id, {
       options: {},
     });
-    if (!data) throw new NotFoundException('Cannot find chapter');
+    if (!data) throw new NotFoundException('Cannot find Course');
     return { data };
   }
 
@@ -117,18 +115,18 @@ export class ChapterAdminController {
     ],
   })
   @RequestParamGuard(IdParamDto)
-  @ResponseMessage('Chapter updated successfully.')
+  @ResponseMessage('Course updated successfully.')
   @Patch('/update/:id')
   async updateById(
     @Param('id') id: number,
-    @Body() body: ChapterUpdateDto,
-  ): Promise<IResponse<ChapterEntity>> {
+    @Body() body: CourseUpdateDto,
+  ): Promise<IResponse<CourseEntity>> {
     const queryRunner: QueryRunner = this.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
       const found = await this.service.getById(id);
-      if (!found) throw new NotFoundException('Cannot find chapter');
+      if (!found) throw new NotFoundException('Cannot find Course');
       const data = await this.service.update(found, body, {
         entityManager: queryRunner.manager,
       });
@@ -154,18 +152,18 @@ export class ChapterAdminController {
     ],
   })
   @RequestParamGuard(IdParamDto)
-  @ResponseMessage('Chapter deleted successfully.')
+  @ResponseMessage('Course deleted successfully.')
   @Patch('/delete/:id')
   async deleteById(
     @Param('id') id: number,
     @Body() body: any,
-  ): Promise<IResponse<ChapterEntity>> {
+  ): Promise<IResponse<CourseEntity>> {
     const queryRunner: QueryRunner = this.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
       const found = await this.service.getById(id);
-      if (!found) throw new NotFoundException('Cannot find chapter');
+      if (!found) throw new NotFoundException('Cannot find Course');
       const data = await this.service.softDelete(found, {
         entityManager: queryRunner.manager,
       });
@@ -181,7 +179,7 @@ export class ChapterAdminController {
 
   @UserProtected({ role: USER_ROLE.ADMIN })
   @ApiDocs({
-    operation: 'Restore chapter',
+    operation: 'Restore Course',
     params: [
       {
         type: 'number',
@@ -191,14 +189,12 @@ export class ChapterAdminController {
     ],
   })
   @RequestParamGuard(IdParamDto)
-  @ResponseMessage('Chapter restored successfully.')
+  @ResponseMessage('Course restored successfully.')
   @Patch('/restore/:id')
-  async restoreById(
-    @Param('id') id: number,
-  ): Promise<IResponse<ChapterEntity>> {
+  async restoreById(@Param('id') id: number): Promise<IResponse<CourseEntity>> {
     await this.service.restore({ where: { id } });
-    const data: ChapterEntity | null = await this.service.getById(id);
-    if (!data) throw new NotFoundException('Cannot find chapter');
+    const data: CourseEntity | null = await this.service.getById(id);
+    if (!data) throw new NotFoundException('Cannot find Course');
     return { data };
   }
 }
