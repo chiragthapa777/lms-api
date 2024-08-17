@@ -11,8 +11,13 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
 export class PaymentEntity extends DatabaseBaseEntity {
   @ApiProperty()
   @Expose({ groups: ALL_GROUP })
-  @Column({ type: String, length: 255, nullable: false })
+  @Column({ type: String, nullable: false })
   remark?: string;
+
+  @ApiProperty()
+  @Expose({ groups: ALL_GROUP })
+  @Column({ type: String, nullable: false })
+  transactionId?: string;
 
   @ApiProperty()
   @Expose({ groups: ALL_GROUP })
@@ -25,27 +30,12 @@ export class PaymentEntity extends DatabaseBaseEntity {
 
   @ApiProperty()
   @Expose({ groups: ALL_GROUP })
-  @Column({
-    type: 'bigint',
-    transformer: new BigIntTransformerPipe(),
-    nullable: true,
-  })
-  enrollmentId?: number;
-
-  @ApiProperty()
-  @Expose({ groups: ALL_GROUP })
   @Column({ type: Number, nullable: true })
-  amount?: string;
+  amount?: number;
 
   @ManyToOne(() => UserEntity, (user) => user.id)
   @JoinColumn({
     name: 'userId',
   })
   user?: UserEntity;
-
-  @OneToOne(() => CourseEnrollmentEntity, (user) => user.id)
-  @JoinColumn({
-    name: 'enrollmentId',
-  })
-  enrollment?: CourseEnrollmentEntity;
 }

@@ -41,7 +41,7 @@ export class CourseEnrollmentEntity extends DatabaseBaseEntity {
     type: Number,
     nullable: true,
   })
-  rating?: number;
+  rating?: number | null;
 
   @ApiProperty()
   @Expose({ groups: ALL_GROUP })
@@ -58,6 +58,9 @@ export class CourseEnrollmentEntity extends DatabaseBaseEntity {
   paymentId?: number;
 
   @OneToOne(() => PaymentEntity, (user) => user.id)
+  @JoinColumn({
+    name: 'paymentId',
+  })
   payment?: PaymentEntity;
 
   @ManyToOne(() => UserEntity, (u) => u.enrollments)

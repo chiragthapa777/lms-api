@@ -38,6 +38,27 @@ export class UserPutToRequestGuard implements CanActivate {
   }
 }
 @Injectable()
+export class UserPutToRequestExtract implements CanActivate {
+  constructor(private authService: AuthenticationService) {}
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context
+      .switchToHttp()
+      .getRequest<IRequest & { __user: any }>();
+
+    const user: { id: number } | undefined = request?.user;
+    if (!user || !user?.id) {
+      return true;
+    }
+    const userFromDb = await this.authService.getUserForRequest(user.id);
+    if (!userFromDb) {
+      return true;
+    }
+    request['__user'] = userFromDb;
+
+    return true;
+  }
+}
+@Injectable()
 export class RoleGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {

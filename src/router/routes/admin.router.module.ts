@@ -7,6 +7,8 @@ import { CourseAdminController } from 'src/modules/course/controllers/course.adm
 import { CourseModule } from 'src/modules/course/course.module';
 import { NoteAdminController } from 'src/modules/notes/controllers/note.admin.controller';
 import { NoteModule } from 'src/modules/notes/note.module';
+import { PaymentAdminController } from 'src/modules/payment/controllers/chapter.admin.controller';
+import { PaymentModule } from 'src/modules/payment/payment.module';
 import { UserAdminController } from 'src/modules/user/controllers/user.admin.controller';
 import { UserModule } from 'src/modules/user/user.module';
 
@@ -17,6 +19,7 @@ import { UserModule } from 'src/modules/user/user.module';
     ChapterAdminController,
     CourseAdminController,
     NoteAdminController,
+    PaymentAdminController,
   ],
   imports: [
     UserModule,
@@ -24,6 +27,7 @@ import { UserModule } from 'src/modules/user/user.module';
     ChapterModule,
     CourseModule,
     NoteModule,
+    PaymentModule,
   ],
 })
 export class AdminRouterModule {}

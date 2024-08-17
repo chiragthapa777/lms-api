@@ -7,6 +7,8 @@ import { CourseController } from 'src/modules/course/controllers/course.controll
 import { CourseModule } from 'src/modules/course/course.module';
 import { NoteController } from 'src/modules/notes/controllers/note.controller';
 import { NoteModule } from 'src/modules/notes/note.module';
+import { PaymentController } from 'src/modules/payment/controllers/chapter.controller';
+import { PaymentModule } from 'src/modules/payment/payment.module';
 import { UserModule } from 'src/modules/user/user.module';
 
 @Module({
@@ -15,6 +17,7 @@ import { UserModule } from 'src/modules/user/user.module';
     ChapterController,
     CourseController,
     NoteController,
+    PaymentController
   ],
   imports: [
     UserModule,
@@ -22,6 +25,7 @@ import { UserModule } from 'src/modules/user/user.module';
     ChapterModule,
     CourseModule,
     NoteModule,
+    PaymentModule
   ],
 })
 export class UserRouterModule {}

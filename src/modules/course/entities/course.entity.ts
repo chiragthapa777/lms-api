@@ -17,9 +17,10 @@ export class CourseEntity extends DatabaseBaseEntity {
   @Expose({ groups: ALL_GROUP })
   @Column({
     type: Number,
-    nullable: true,
+    nullable: false,
+    default: 0,
   })
-  price?: number;
+  price: number;
 
   @ApiProperty()
   @Expose({ groups: ALL_GROUP })
@@ -30,6 +31,11 @@ export class CourseEntity extends DatabaseBaseEntity {
   @Expose({ groups: ALL_GROUP })
   @Column({ type: String, nullable: true })
   photoLink?: string;
+
+  @ApiProperty()
+  @Expose({ groups: ALL_GROUP })
+  @Column({ type: Number, nullable: true, default: 0 })
+  rating?: number;
 
   @OneToMany(() => ChapterEntity, (c) => c.course)
   chapters?: ChapterEntity[];

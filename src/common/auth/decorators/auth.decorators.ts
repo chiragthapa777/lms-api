@@ -9,6 +9,7 @@ import { Reflector } from '@nestjs/core';
 import IRequest from 'src/common/request/interfaces/request.interface';
 import {
   RoleGuard,
+  UserPutToRequestExtract,
   UserPutToRequestGuard,
 } from 'src/modules/authentication/guards/user-put-to-request.guard';
 import { USER_ROLE, UserEntity } from 'src/modules/user/entities/user.entity';
@@ -29,8 +30,9 @@ export function UserProtected(options?: { role: USER_ROLE }): MethodDecorator {
     UseGuards(...decorators),
   );
 }
+
 export function UserExtract(): MethodDecorator {
-  const decorators: any[] = [AuthJwtExtractUser];
+  const decorators: any[] = [AuthJwtExtractUser, UserPutToRequestExtract];
   return applyDecorators(UseGuards(...decorators));
 }
 

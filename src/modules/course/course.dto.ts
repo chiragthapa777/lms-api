@@ -23,3 +23,20 @@ export class CourseCreateDto {
 }
 
 export class CourseUpdateDto extends PartialType(CourseCreateDto) {}
+export class CourseRateDto {
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  review: string;
+
+  @ApiProperty()
+  @IsNumber()
+  @IsNotEmpty()
+  rating: number;
+}
+export class CourseEnrollDto {
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  transactionId: string;
+}

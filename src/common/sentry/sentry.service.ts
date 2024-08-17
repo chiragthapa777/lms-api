@@ -16,7 +16,6 @@ export class SentryService {
         profilesSampleRate: 1.0,
         environment: this.configService.get('app.env'),
       });
-      console.log('Sentry initialized');
     }
   }
 

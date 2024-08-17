@@ -59,7 +59,7 @@ export class CourseService {
   }
 
   async paginatedQueryBuilderFind(
-    options: IPaginateQueryBuilderOption,
+    options: IPaginateQueryBuilderOption<CourseEntity>,
   ): Promise<{
     data: CourseEntity[];
     _pagination: IPaginationMeta;

@@ -1,8 +1,11 @@
 import {
+  Body,
   Controller,
   Get,
   NotFoundException,
   Param,
+  Patch,
+  Post,
   Query,
 } from '@nestjs/common';
 import { ApiDocs } from 'src/common/doc/common-docs';
@@ -14,25 +17,42 @@ import {
   IResponse,
   IResponsePaging,
 } from 'src/common/response/interfaces/response.interface';
-import { DataSource, FindOptionsWhere } from 'typeorm';
+import { DataSource, FindOptionsWhere, QueryRunner } from 'typeorm';
 import { CourseService } from '../course.service';
 import { CourseEntity } from '../entities/course.entity';
 import { ApiTags } from '@nestjs/swagger';
+import {
+  GetUser,
+  UserExtract,
+  UserProtected,
+} from 'src/common/auth/decorators/auth.decorators';
+import { USER_ROLE, UserEntity } from 'src/modules/user/entities/user.entity';
+import { CourseEnrollDto, CourseRateDto, CourseUpdateDto } from '../course.dto';
+import { EnrollmentService } from 'src/modules/enrollment/enrollment.service';
+import { PaymentService } from 'src/modules/payment/payment.service';
+import { CourseEnrollmentEntity } from 'src/modules/enrollment/entities/course-enrollements.entity';
 
 @ApiTags('Course')
 @Controller({
   path: 'course',
 })
 export class CourseController {
-  constructor(private readonly service: CourseService) {}
+  constructor(
+    private readonly service: CourseService,
+    private readonly enrollService: EnrollmentService,
+    private readonly paymentService: PaymentService,
+    private connection: DataSource,
+  ) {}
 
   @ApiDocs({
     operation: 'List course',
   })
   @ResponseMessage('Users listed successfully.')
   @Get('/list')
+  @UserExtract()
   async list(
     @Query() paginateQueryDto: PaginateQueryDto,
+    @GetUser() user: UserEntity | null,
   ): Promise<IResponsePaging<CourseEntity>> {
     const where: FindOptionsWhere<CourseEntity> = {};
     const data = await this.service.paginatedGet({
@@ -43,9 +63,180 @@ export class CourseController {
       defaultSortOrder: 'DESC',
       options: {
         where: where,
+        relations: {
+          enrollments: true,
+        },
       },
     });
     return data;
+  }
+
+  @ApiDocs({
+    operation: 'List course',
+  })
+  @ResponseMessage('Users listed successfully.')
+  @Get('/enrolled')
+  @UserProtected({ role: USER_ROLE.USER })
+  async enrolled(
+    @Query() paginateQueryDto: PaginateQueryDto,
+    @GetUser() user: UserEntity,
+  ): Promise<IResponsePaging<CourseEntity>> {
+    const queryBuilder = this.service
+      .getQueryBuilder('course')
+      .leftJoinAndSelect('course.chapters', 'chapters')
+      .leftJoinAndSelect('chapters.notes', 'notes')
+      .innerJoinAndSelect(
+        'course.enrollments',
+        'enrollments',
+        'enrollments.userId=:userId',
+        { userId: user.id },
+      );
+    const data = await this.service.paginatedQueryBuilderFind({
+      ...paginateQueryDto,
+      searchableColumns: ['content', 'title'],
+      defaultSearchColumns: ['title'],
+      defaultSortColumn: 'createdAt',
+      defaultSortOrder: 'DESC',
+      queryBuilder,
+    });
+    return data;
+  }
+
+  @UserProtected({ role: USER_ROLE.USER })
+  @ApiDocs({
+    operation: 'rate course',
+    params: [
+      {
+        type: 'number',
+        required: true,
+        name: 'id',
+      },
+    ],
+  })
+  @RequestParamGuard(IdParamDto)
+  @ResponseMessage('Course updated successfully.')
+  @Patch('/rate/:id')
+  async rateById(
+    @Param('id') id: number,
+    @Body() body: CourseRateDto,
+    @GetUser() user: UserEntity,
+  ): Promise<IResponse<any>> {
+    const queryRunner: QueryRunner = this.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const found = await this.service.getById(id);
+
+      if (!found) {
+        throw new NotFoundException('Cannot find course');
+      }
+
+      const enrollment: CourseEnrollmentEntity | null =
+        await this.enrollService.getOne({
+          entityManager: queryRunner.manager,
+          options: {
+            where: {
+              userId: user.id,
+              courseId: id,
+            },
+          },
+        });
+
+      if (!enrollment) {
+        throw new NotFoundException('Cannot find enrollment');
+      }
+
+      await this.enrollService.update(enrollment, body, {
+        entityManager: queryRunner.manager,
+      });
+
+      const ratings = await this.enrollService
+        .getQueryBuilder('enroll')
+        .where('enroll.courseId = :courseId and enroll.rating is not NULL', {
+          courseId: enrollment.courseId,
+        })
+        .select('AVG(rating)', 'avg')
+        .getRawOne();
+
+      if (!found) {
+        throw new NotFoundException('Cannot find course');
+      }
+
+      await this.service.update(
+        found,
+        { rating: Number(ratings?.avg ?? 0) },
+        { entityManager: queryRunner.manager },
+      );
+
+      await queryRunner.commitTransaction();
+      return { data: ratings };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  @UserProtected({ role: USER_ROLE.USER })
+  @ApiDocs({
+    operation: 'rate course',
+    params: [
+      {
+        type: 'number',
+        required: true,
+        name: 'id',
+      },
+    ],
+  })
+  @RequestParamGuard(IdParamDto)
+  @ResponseMessage('Course updated successfully.')
+  @Patch('/rate/:id')
+  async enrollById(
+    @Param('id') id: number,
+    @Body() body: CourseEnrollDto,
+    @GetUser() user: UserEntity,
+  ): Promise<IResponse<any>> {
+    const queryRunner: QueryRunner = this.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const found = await this.service.getById(id);
+
+      if (!found) {
+        throw new NotFoundException('Cannot find course');
+      }
+
+      const payment = await this.paymentService.create(
+        {
+          amount: found.price,
+          transactionId: body.transactionId,
+          userId: user.id,
+        },
+        { entityManager: queryRunner.manager },
+      );
+
+      const enrollment = await this.enrollService.create(
+        {
+          courseId: found.id,
+          userId: user.id,
+          rating: null,
+          review: '',
+          paymentId: payment.id,
+        },
+        {
+          entityManager: queryRunner.manager,
+        },
+      );
+
+      await queryRunner.commitTransaction();
+      return { data: enrollment };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   @ApiDocs({
@@ -63,7 +254,13 @@ export class CourseController {
   @Get('/info/:id')
   async getById(@Param('id') id: number): Promise<IResponse<CourseEntity>> {
     const data = await this.service.getById(id, {
-      options: {},
+      options: {
+        relations: {
+          enrollments: {
+            user: true,
+          },
+        },
+      },
     });
     if (!data) throw new NotFoundException('Cannot find course');
     return { data };
