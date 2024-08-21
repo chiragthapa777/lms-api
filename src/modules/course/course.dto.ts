@@ -8,6 +8,11 @@ export class CourseCreateDto {
   title?: string;
 
   @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  description?: string;
+
+  @ApiProperty()
   @IsNumber()
   @IsNotEmpty()
   price?: number;

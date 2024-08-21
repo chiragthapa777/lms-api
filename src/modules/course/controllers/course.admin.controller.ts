@@ -76,6 +76,10 @@ export class CourseAdminController {
       defaultSortOrder: 'DESC',
       options: {
         where: where,
+        relations: {
+          enrollments: true,
+          chapters: true,
+        },
       },
     });
     return data;

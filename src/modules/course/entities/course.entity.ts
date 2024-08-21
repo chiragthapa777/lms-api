@@ -15,6 +15,11 @@ export class CourseEntity extends DatabaseBaseEntity {
 
   @ApiProperty()
   @Expose({ groups: ALL_GROUP })
+  @Column({ type: String, nullable: false, default: '' })
+  description?: string;
+
+  @ApiProperty()
+  @Expose({ groups: ALL_GROUP })
   @Column({
     type: Number,
     nullable: false,
