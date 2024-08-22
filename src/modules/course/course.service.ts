@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { ICreateOptions } from 'src/common/database/interfaces/createOption.interface';
 import { IDeleteOptions } from 'src/common/database/interfaces/deleteOption.interface';
 import {
@@ -24,6 +24,12 @@ export class CourseService {
     createDto: Partial<CourseEntity>,
     options?: ICreateOptions,
   ): Promise<CourseEntity> {
+    const found = await this.getOne({
+      options: { where: { title: createDto.title } },
+    });
+    if (found) {
+      throw new BadRequestException('Same title exists');
+    }
     const data = await this.repo._create(createDto, {
       entityManager: options?.entityManager,
     });

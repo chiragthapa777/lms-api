@@ -1,5 +1,5 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class ChapterCreateDto {
   @ApiProperty()
@@ -14,11 +14,16 @@ export class ChapterCreateDto {
 
   @ApiProperty()
   @IsNotEmpty()
+  @IsNotEmpty()
+  courseId?: number;
+
+  @ApiProperty()
+  @IsNotEmpty()
   @IsString()
   videoLink?: string;
 
   @ApiProperty()
-  @IsNotEmpty()
+  @IsOptional()
   @IsNumber()
   index?: number;
 }

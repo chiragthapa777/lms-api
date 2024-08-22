@@ -24,6 +24,22 @@ export class ChapterService {
     createDto: Partial<ChapterEntity>,
     options?: ICreateOptions,
   ): Promise<ChapterEntity> {
+    const latestChapter = await this.getOne({
+      options: {
+        where: {
+          courseId: createDto.courseId,
+        },
+        order: {
+          index: 'DESC',
+        },
+        withDeleted: true,
+      },
+    });
+    if (latestChapter?.index) {
+      createDto.index = latestChapter.index + 1;
+    } else {
+      createDto.index = 0;
+    }
     const data = await this.repo._create(createDto, {
       entityManager: options?.entityManager,
     });
