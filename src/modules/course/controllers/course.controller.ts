@@ -180,7 +180,7 @@ export class CourseController {
 
   @UserProtected({ role: USER_ROLE.USER })
   @ApiDocs({
-    operation: 'rate course',
+    operation: 'enroll course',
     params: [
       {
         type: 'number',
@@ -191,12 +191,13 @@ export class CourseController {
   })
   @RequestParamGuard(IdParamDto)
   @ResponseMessage('Course updated successfully.')
-  @Patch('/rate/:id')
+  @Patch('/enroll/:id')
   async enrollById(
     @Param('id') id: number,
     @Body() body: CourseEnrollDto,
     @GetUser() user: UserEntity,
   ): Promise<IResponse<any>> {
+    console.log('🚀 ~ CourseController ~ Body:', Body);
     const queryRunner: QueryRunner = this.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -212,6 +213,7 @@ export class CourseController {
           amount: found.price,
           transactionId: body.transactionId,
           userId: user.id,
+          remark: 'Paid from esewa',
         },
         { entityManager: queryRunner.manager },
       );
@@ -249,19 +251,27 @@ export class CourseController {
       },
     ],
   })
+  @UserProtected()
   @RequestParamGuard(IdParamDto)
   @ResponseMessage('Chapter retrieved successfully.')
   @Get('/info/:id')
-  async getById(@Param('id') id: number): Promise<IResponse<CourseEntity>> {
-    const data = await this.service.getById(id, {
-      options: {
-        relations: {
-          enrollments: {
-            user: true,
-          },
-        },
-      },
-    });
+  async getById(
+    @Param('id') id: number,
+    @GetUser() user: UserEntity,
+  ): Promise<IResponse<CourseEntity>> {
+    const queryBuilder = this.service
+      .getQueryBuilder('course')
+      .where('course.id = :id', { id })
+      .leftJoinAndSelect('course.enrollments', 'enrollments')
+      .leftJoinAndSelect('enrollments.user', 'user')
+      .leftJoinAndSelect('course.chapters', 'chapters')
+      .leftJoinAndSelect(
+        'chapters.notes',
+        'notes',
+        ' notes.userId = :userId ',
+        { userId: user.id },
+      );
+    const data = await queryBuilder.getOne();
     if (!data) throw new NotFoundException('Cannot find course');
     return { data };
   }
