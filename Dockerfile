@@ -2,7 +2,7 @@ FROM node:20.12.1-alpine as base
 # app dependency
 RUN npm i -g pnpm
 # for pg_dump command
-RUN apk add --no-cache postgresql-client 
+# RUN apk add --no-cache postgresql-client 
 # for migration run
 # RUN npm i -g typeorm
 # Create a non-root user

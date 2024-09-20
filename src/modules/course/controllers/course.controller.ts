@@ -17,7 +17,7 @@ import {
   IResponse,
   IResponsePaging,
 } from 'src/common/response/interfaces/response.interface';
-import { DataSource, FindOptionsWhere, QueryRunner } from 'typeorm';
+import { DataSource, FindOptionsWhere, In, QueryRunner } from 'typeorm';
 import { CourseService } from '../course.service';
 import { CourseEntity } from '../entities/course.entity';
 import { ApiTags } from '@nestjs/swagger';
@@ -31,6 +31,8 @@ import { CourseEnrollDto, CourseRateDto, CourseUpdateDto } from '../course.dto';
 import { EnrollmentService } from 'src/modules/enrollment/enrollment.service';
 import { PaymentService } from 'src/modules/payment/payment.service';
 import { CourseEnrollmentEntity } from 'src/modules/enrollment/entities/course-enrollements.entity';
+import { HttpService } from '@nestjs/axios';
+import { ConfigService } from '@nestjs/config';
 
 @ApiTags('Course')
 @Controller({
@@ -42,6 +44,8 @@ export class CourseController {
     private readonly enrollService: EnrollmentService,
     private readonly paymentService: PaymentService,
     private connection: DataSource,
+    private readonly httpService: HttpService,
+    private readonly configService: ConfigService,
   ) {}
 
   @ApiDocs({
@@ -52,7 +56,6 @@ export class CourseController {
   @UserExtract()
   async list(
     @Query() paginateQueryDto: PaginateQueryDto,
-    @GetUser() user: UserEntity | null,
   ): Promise<IResponsePaging<CourseEntity>> {
     const where: FindOptionsWhere<CourseEntity> = {};
     const data = await this.service.paginatedGet({
@@ -69,6 +72,52 @@ export class CourseController {
       },
     });
     return data;
+  }
+
+  @ApiDocs({
+    operation: 'recommend course',
+  })
+  @ResponseMessage('Users listed successfully.')
+  @Get('/recommend')
+  @UserExtract()
+  async recommend(
+    @Query() paginateQueryDto: PaginateQueryDto,
+    @GetUser() user: UserEntity | null,
+  ): Promise<IResponsePaging<CourseEntity>> {
+    if (!user) {
+      return await this.list(paginateQueryDto);
+    }
+
+    try {
+      const data = await this.httpService.axiosRef.get(
+        this.configService.get('RECOMENDER_URL') +
+          '/recommend/' +
+          user.id.toString(),
+      );
+      const recommendedCourses: number[] = data.data?.recommendedCourses ?? [];
+      if (!recommendedCourses) {
+        return await this.list(paginateQueryDto);
+      }
+      const courses = await this.service.getAll({
+        options: {
+          where: {
+            id: In(recommendedCourses),
+          },
+        },
+      });
+
+      return {
+        data: courses,
+        _pagination: {
+          totalPage: 1,
+          total: recommendedCourses.length,
+          limit: 10,
+          page: 1,
+        },
+      };
+    } catch (error) {
+      return await this.list(paginateQueryDto);
+    }
   }
 
   @ApiDocs({

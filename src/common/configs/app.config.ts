@@ -5,7 +5,7 @@ export default registerAs(
   (): Record<string, any> => ({
     repoVersion: version,
     versioning: {
-      enable: process.env.HTTP_VERSIONING_ENABLE === 'true' ?? false,
+      enable: process.env.HTTP_VERSIONING_ENABLE === 'true' || false,
       prefix: 'v',
       version: process.env.HTTP_VERSION,
     },
