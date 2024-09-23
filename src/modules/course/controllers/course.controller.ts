@@ -214,7 +214,7 @@ export class CourseController {
       });
 
       const ratings = await this.enrollService
-        .getQueryBuilder('enroll')
+        .getQueryBuilder('enroll', { entityManager: queryRunner.manager })
         .where('enroll.courseId = :courseId and enroll.rating is not NULL', {
           courseId: enrollment.courseId,
         })
@@ -225,11 +225,13 @@ export class CourseController {
         throw new NotFoundException('Cannot find course');
       }
 
-      await this.service.update(
-        found,
-        { rating: Number(ratings?.avg ?? 0) },
-        { entityManager: queryRunner.manager },
-      );
+      if (ratings?.avg) {
+        await this.service.update(
+          found,
+          { rating: Number(ratings?.avg) },
+          { entityManager: queryRunner.manager },
+        );
+      }
 
       await queryRunner.commitTransaction();
       return { data: ratings };

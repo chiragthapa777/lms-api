@@ -4,6 +4,7 @@ import { IDeleteOptions } from 'src/common/database/interfaces/deleteOption.inte
 import {
   IFindAllOptions,
   IFindOneOptions,
+  IGetQueryBuilderOption,
   IPaginateFindOption,
   IPaginateQueryBuilderOption,
 } from 'src/common/database/interfaces/findOption.interface';
@@ -89,7 +90,10 @@ export class EnrollmentService {
     return await this.repo._restoreRaw(options);
   }
 
-  getQueryBuilder(name: string): SelectQueryBuilder<CourseEnrollmentEntity> {
+  getQueryBuilder(
+    name: string,
+    options?: IGetQueryBuilderOption,
+  ): SelectQueryBuilder<CourseEnrollmentEntity> {
     return this.repo._getQueryBuilder(name);
   }
 
