@@ -95,13 +95,16 @@ export class CourseController {
           user.id.toString(),
       );
       const recommendedCourses: number[] = data.data?.recommendedCourses ?? [];
-      if (!recommendedCourses || recommendedCourses.length===0) {
+      if (!recommendedCourses || recommendedCourses.length === 0) {
         return await this.list(paginateQueryDto);
       }
       const courses = await this.service.getAll({
         options: {
           where: {
             id: In(recommendedCourses),
+          },
+          relations: {
+            enrollments: true,
           },
         },
       });

@@ -11,7 +11,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 export class ChapterEntity extends DatabaseBaseEntity {
   @ApiProperty()
   @Expose({ groups: ALL_GROUP })
-  @Column({ type: String, length: 255, unique: true, nullable: false })
+  @Column({ type: String, length: 255, nullable: false })
   title?: string;
 
   @ApiProperty()
