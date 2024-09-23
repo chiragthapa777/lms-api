@@ -25,7 +25,7 @@
     "migration:run": "npm run typeorm -- --dataSource=src/database/data-source.ts migration:run",
     "migration:revert": "npm run typeorm -- --dataSource=src/database/data-source.ts migration:revert",
     "migration:prod": "npx typeorm --dataSource=dist/src/database/data-source.js migration:run",
-    "docker:push": "docker build -t chiragthapa777/coursecloud-recommender:v1 . && docker push chiragthapa777/coursecloud-recommender:v1",
+    "docker:push": "docker build -t chiragthapa777/cloudcourse-api:v2 . && docker push chiragthapa777/cloudcourse-api:v2",
     "ls": "ls"
   },
   "dependencies": {

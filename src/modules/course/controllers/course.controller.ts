@@ -94,7 +94,18 @@ export class CourseController {
           '/recommend/' +
           user.id.toString(),
       );
-      const recommendedCourses: number[] = data.data?.recommendedCourses ?? [];
+      const allEnrollments = await this.enrollService.getAll({
+        options: {
+          where: {
+            userId: user.id,
+          },
+        },
+      });
+      const allEnrollmentIds = allEnrollments.map((e) => e.id);
+      const recommendedCourses: number[] =
+        data.data?.recommendedCourses?.filter(
+          (r) => !allEnrollmentIds.includes(r),
+        ) ?? [];
       if (!recommendedCourses || recommendedCourses.length === 0) {
         return await this.list(paginateQueryDto);
       }
