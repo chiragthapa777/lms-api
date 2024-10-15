@@ -1,5 +1,11 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsString, IsUrl } from 'class-validator';
+import {
+  IsBoolean,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  IsUrl,
+} from 'class-validator';
 
 export class CourseCreateDto {
   @ApiProperty()
@@ -38,6 +44,12 @@ export class CourseRateDto {
   @IsNumber()
   @IsNotEmpty()
   rating: number;
+}
+export class CourseChapterViewDto {
+  @ApiProperty()
+  @IsBoolean()
+  @IsNotEmpty()
+  completed: boolean;
 }
 export class CourseEnrollDto {
   @ApiProperty()

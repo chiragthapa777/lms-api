@@ -6,6 +6,7 @@ import { CourseEntity } from 'src/modules/course/entities/course.entity';
 import { NotesEntity } from 'src/modules/notes/entities/note.entity';
 import { BigIntTransformerPipe } from 'src/utils/bigIntTransformer';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import { ChapterViewEntity } from '../../chapter-view/entities/chapter-view.entity';
 
 @Entity({ name: 'chapter' })
 export class ChapterEntity extends DatabaseBaseEntity {
@@ -46,4 +47,7 @@ export class ChapterEntity extends DatabaseBaseEntity {
 
   @OneToMany(() => NotesEntity, (a) => a.chapter)
   notes: NotesEntity[];
+
+  @OneToMany(() => ChapterViewEntity, (a) => a.chapter)
+  views: ChapterViewEntity[];
 }

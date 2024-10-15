@@ -4,6 +4,7 @@ import {
   Get,
   NotFoundException,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   Query,
@@ -27,12 +28,19 @@ import {
   UserProtected,
 } from 'src/common/auth/decorators/auth.decorators';
 import { USER_ROLE, UserEntity } from 'src/modules/user/entities/user.entity';
-import { CourseEnrollDto, CourseRateDto, CourseUpdateDto } from '../course.dto';
+import {
+  CourseChapterViewDto,
+  CourseEnrollDto,
+  CourseRateDto,
+  CourseUpdateDto,
+} from '../course.dto';
 import { EnrollmentService } from 'src/modules/enrollment/enrollment.service';
 import { PaymentService } from 'src/modules/payment/payment.service';
 import { CourseEnrollmentEntity } from 'src/modules/enrollment/entities/course-enrollements.entity';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
+import { ChapterViewRepository } from 'src/modules/chapter-view/repositories/chapter-view.repository';
+import { ChapterViewEntity } from 'src/modules/chapter-view/entities/chapter-view.entity';
 
 @ApiTags('Course')
 @Controller({
@@ -46,6 +54,7 @@ export class CourseController {
     private connection: DataSource,
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
+    private readonly chapterViewRepository: ChapterViewRepository,
   ) {}
 
   @ApiDocs({
@@ -121,7 +130,9 @@ export class CourseController {
       });
 
       return {
-        data: courses,
+        data: recommendedCourses
+          .map((cid) => courses.find((c) => c.id === cid))
+          .filter((c) => c) as CourseEntity[],
         _pagination: {
           totalPage: 1,
           total: recommendedCourses.length,
@@ -147,8 +158,13 @@ export class CourseController {
     const queryBuilder = this.service
       .getQueryBuilder('course')
       .leftJoinAndSelect('course.chapters', 'chapters')
-      .leftJoinAndSelect('chapters.notes', 'notes')
-      .innerJoinAndSelect(
+      .leftJoinAndSelect(
+        'chapters.views',
+        'views',
+        ' views.userId = :userId ',
+        { userId: user.id },
+      )
+      .innerJoin(
         'course.enrollments',
         'enrollments',
         'enrollments.userId=:userId',
@@ -331,6 +347,13 @@ export class CourseController {
       .leftJoinAndSelect('enrollments.user', 'user')
       .leftJoinAndSelect('course.chapters', 'chapters')
       .leftJoinAndSelect(
+        'chapters.views',
+        'views',
+        ' views.userId = :userId ',
+        { userId: user.id },
+      )
+
+      .leftJoinAndSelect(
         'chapters.notes',
         'notes',
         ' notes.userId = :userId ',
@@ -339,5 +362,58 @@ export class CourseController {
     const data = await queryBuilder.getOne();
     if (!data) throw new NotFoundException('Cannot find course');
     return { data };
+  }
+
+  @UserProtected({ role: USER_ROLE.USER })
+  @ApiDocs({
+    operation: 'toggleCompleteChapterById',
+    params: [
+      {
+        type: 'number',
+        required: true,
+        name: 'id',
+        description:"chapter's id"
+      },
+    ],
+  })
+  @RequestParamGuard(IdParamDto)
+  @ResponseMessage('toggleCompleteChapterById')
+  @Patch('/view/:id')
+  async toggleCompleteChapterById(
+    @Param('id', ParseIntPipe) chapterId: number,
+    @Body() body: CourseChapterViewDto,
+    @GetUser() user: UserEntity,
+  ): Promise<IResponse<any>> {
+    const queryRunner: QueryRunner = this.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      let viewFound: ChapterViewEntity | null =
+        await this.chapterViewRepository._findOne({
+          options: {
+            where: {
+              chapterId,
+              userId: user.id,
+            },
+          },
+        });
+      if (viewFound) {
+        viewFound.completed = body.completed;
+        await viewFound.save();
+      } else {
+        viewFound = await this.chapterViewRepository._create({
+          chapterId,
+          userId: user.id,
+          completed: body.completed,
+        });
+      }
+      await queryRunner.commitTransaction();
+      return { data: viewFound };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
 }

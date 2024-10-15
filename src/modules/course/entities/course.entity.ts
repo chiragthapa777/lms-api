@@ -39,7 +39,7 @@ export class CourseEntity extends DatabaseBaseEntity {
 
   @ApiProperty()
   @Expose({ groups: ALL_GROUP })
-  @Column({ type: Number, nullable: true, default: 0 })
+  @Column({ type: 'decimal', nullable: true, default: 0 })
   rating?: number;
 
   @OneToMany(() => ChapterEntity, (c) => c.course)

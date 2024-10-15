@@ -1,18 +1,25 @@
+import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
-import { CourseService } from './course.service';
-import { CourseRepositoryModule } from './repositories/course.repository.module';
+import { ChapterViewRepositoryModule } from '../chapter-view/repositories/chapter-view.repository.module';
 import { EnrollmentModule } from '../enrollment/enrollement.module';
 import { PaymentModule } from '../payment/payment.module';
-import { HttpModule } from '@nestjs/axios';
+import { CourseService } from './course.service';
+import { CourseRepositoryModule } from './repositories/course.repository.module';
 
 @Module({
   providers: [CourseService],
-  exports: [CourseService, EnrollmentModule, HttpModule],
+  exports: [
+    CourseService,
+    EnrollmentModule,
+    HttpModule,
+    ChapterViewRepositoryModule,
+  ],
   imports: [
     CourseRepositoryModule,
     EnrollmentModule,
     PaymentModule,
     HttpModule,
+    ChapterViewRepositoryModule,
   ],
 })
 export class CourseModule {}
